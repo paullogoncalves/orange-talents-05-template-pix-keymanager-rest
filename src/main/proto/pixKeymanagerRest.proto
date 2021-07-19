@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.orangetalent05";
+option java_outer_classname = "PixKeymanagerRest";
+option objc_class_prefix = "HLW";
+
+package br.com.orangetalent05;
+
+service PixKeymanagerRestService {
+  rpc send (PixKeymanagerRestRequest) returns (PixKeymanagerRestReply) {}
+}
+
+message PixKeymanagerRestRequest {
+  string name = 1;
+}
+
+message PixKeymanagerRestReply {
+  string message = 1;
+}
