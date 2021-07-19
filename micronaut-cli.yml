@@ -1,6 +1,6 @@
 applicationType: default
 defaultPackage: br.com.orangetalent05
 testFramework: junit
-sourceLanguage: java
+sourceLanguage: kotlin
 buildTool: gradle
-features: [annotation-api, app-name, data, data-jpa, gradle, hibernate-validator, http-client, java, java-application, jdbc-hikari, junit, logback, netty-server, postgres, readme, shade, testcontainers, yaml]
+features: [annotation-api, app-name, data, data-jpa, gradle, hibernate-validator, http-client, jdbc-hikari, junit, kotlin, kotlin-application, logback, netty-server, postgres, readme, shade, testcontainers, yaml]
