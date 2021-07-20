@@ -5,7 +5,10 @@ import br.com.orangetalent05.TipoDeChave
 import br.com.orangetalent05.TipoDeConta
 import br.com.orangetalent05.pixkeymaneger.shared.validations.ValidPixKey
 import io.micronaut.core.annotation.Introspected
-import io.micronaut.validation.validator.constraints.EmailValidator
+import javax.validation.ConstraintValidatorContext
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator
+//import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
+//import io.micronaut.validation.validator.constraints.EmailValidator
 import org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator
 import java.util.*
 import javax.validation.constraints.NotNull
@@ -13,9 +16,11 @@ import javax.validation.constraints.Size
 
 @ValidPixKey
 @Introspected
-class NovaChaveRequest(@field:NotNull val tipoDeConta: TipoDeContaRequest?,
-                       @field:Size(max = 77) val chave: String?,
-                       @field:NotNull val tipoDeChave: TipoDeChaveRequest?) {
+class NovaChaveRequest(
+    @field:NotNull val tipoDeConta: TipoDeContaRequest?,
+    @field:Size(max = 77) val chave: String?,
+    @field:NotNull val tipoDeChave: TipoDeChaveRequest?,
+) {
 
     fun toGrpc(clientId: UUID): RegistraChavePixRequest {
         return RegistraChavePixRequest.newBuilder()
@@ -38,6 +43,7 @@ enum class TipoDeChaveRequest(val atributoGrpc: TipoDeChave) {
             }
 
             return CPFValidator().run {
+                println(this.toString())
                 initialize(null)
                 isValid(chave, null)
             }
@@ -62,10 +68,11 @@ enum class TipoDeChaveRequest(val atributoGrpc: TipoDeChave) {
             if (chave.isNullOrBlank()) {
                 return false
             }
-            return EmailValidator().run {
-                initialize(null)
-                isValid(chave, null)
-            }
+            return true
+//            EmailValidator().run {
+//                initialize(null)
+//                isValid(chave, null)
+//            }
 
         }
     },
