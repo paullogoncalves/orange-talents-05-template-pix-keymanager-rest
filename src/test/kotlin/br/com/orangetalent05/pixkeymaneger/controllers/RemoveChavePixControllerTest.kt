@@ -32,7 +32,7 @@ internal class RemoveChavePixControllerTest() {
     lateinit var client: HttpClient
 
     @Test
-    fun `deve remover uma chave pix`() {
+    fun `deve remover uma chave pix Existente`() {
 
         val clienteId = UUID.randomUUID().toString()
         val pixId = UUID.randomUUID().toString()
