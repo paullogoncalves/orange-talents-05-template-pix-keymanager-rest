@@ -1,9 +1,6 @@
 package br.com.orangetalent05.pixkeymaneger.controllers
 
-import br.com.orangetalent05.ConsultaChavePixResponse
-import br.com.orangetalent05.PixKeymanagerConsultaGrpcServiceGrpc
-import br.com.orangetalent05.TipoDeChave
-import br.com.orangetalent05.TipoDeConta
+import br.com.orangetalent05.*
 import br.com.orangetalent05.pixkeymaneger.shared.GrpcClientFactory
 import com.google.protobuf.Timestamp
 import io.micronaut.context.annotation.Factory
@@ -24,10 +21,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @MicronautTest
-internal class ConsultaDetalheChaveControllerTest {
+internal class ConsultaDetalheChaveControllerTest() {
 
     @field:Inject
-    lateinit var grpcClient: PixKeymanagerConsultaGrpcServiceGrpc.PixKeymanagerConsultaGrpcServiceBlockingStub
+    lateinit var grpcConsultaClient: PixKeymanagerConsultaGrpcServiceGrpc.PixKeymanagerConsultaGrpcServiceBlockingStub
+
+    @field:Inject
+    lateinit var grpcListaClient: PixKeymanagerListaGrpcServiceGrpc.PixKeymanagerListaGrpcServiceBlockingStub
 
     @field:Inject
     @field:Client("/")
@@ -39,13 +39,70 @@ internal class ConsultaDetalheChaveControllerTest {
         val clienteId = UUID.randomUUID().toString()
         val pixId = UUID.randomUUID().toString()
 
-        given(grpcClient.busca(Mockito.any())).willReturn(cunsultaChavePixResponse(clienteId, pixId))
+        given(grpcConsultaClient.busca(Mockito.any())).willReturn(cunsultaChavePixResponse(clienteId, pixId))
 
         val request = HttpRequest.GET<Any>("/api/v1/clientes/$clienteId/pix/$pixId")
         val response = client.toBlocking().exchange(request, Any::class.java)
 
         assertEquals(HttpStatus.OK, response.status)
         assertNotNull((response.body()))
+    }
+
+    @Test
+    fun `deve carregar uma lista de chave pix`() {
+
+        val clienteId = UUID.randomUUID().toString()
+
+        given(grpcListaClient.lista(Mockito.any())).willReturn(listaChavePixResponse(clienteId))
+
+        val request = HttpRequest.GET<Any>("/api/v1/clientes/$clienteId/pix/")
+        val response = client.toBlocking().exchange(request, List::class.java)
+
+        assertEquals(HttpStatus.OK, response.status)
+        assertNotNull(response.body())
+        assertEquals(response.body().size, 2)
+
+
+
+
+
+    }
+
+    private fun listaChavePixResponse(clientId: String): ListaChavesPixResponse {
+
+        val chaveCpf = ListaChavesPixResponse.ChavePix.newBuilder()
+            .setPixId(UUID.randomUUID().toString())
+            .setTipo(TipoDeChave.CPF)
+            .setChave("12345678900")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .setCriadaEm(LocalDateTime.now().let {
+                val createdAt = it.atZone(ZoneId.of("UTC")).toInstant()
+                Timestamp.newBuilder()
+                    .setSeconds(createdAt.epochSecond)
+                    .setNanos(createdAt.nano)
+                    .build()
+            })
+            .build()
+
+        val chaveCelular = ListaChavesPixResponse.ChavePix.newBuilder()
+            .setPixId(UUID.randomUUID().toString())
+            .setTipo(TipoDeChave.CELULAR)
+            .setChave("557198764562")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .setCriadaEm(LocalDateTime.now().let {
+                val createdAt = it.atZone(ZoneId.of("UTC")).toInstant()
+                Timestamp.newBuilder()
+                    .setSeconds(createdAt.epochSecond)
+                    .setNanos(createdAt.nano)
+                    .build()
+            })
+            .build()
+
+        return ListaChavesPixResponse.newBuilder()
+            .setClienteId(clientId)
+            .addAllChaves(listOf(chaveCpf, chaveCelular))
+            .build()
+
     }
 
     private fun cunsultaChavePixResponse(clientId: String, pixId: String):
@@ -80,6 +137,9 @@ internal class ConsultaDetalheChaveControllerTest {
     internal class MockitoStubFactory {
 
         @Singleton
-        fun stubMock() = Mockito.mock(PixKeymanagerConsultaGrpcServiceGrpc.PixKeymanagerConsultaGrpcServiceBlockingStub::class.java)
+        fun consulta() = Mockito.mock(PixKeymanagerConsultaGrpcServiceGrpc.PixKeymanagerConsultaGrpcServiceBlockingStub::class.java)
+
+        @Singleton
+        fun lista() = Mockito.mock(PixKeymanagerListaGrpcServiceGrpc.PixKeymanagerListaGrpcServiceBlockingStub::class.java)
     }
 }
